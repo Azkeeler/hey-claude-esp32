@@ -1,0 +1,70 @@
+# Se copia a config.toml. No lleva secretos: el token va en .env (ASISTENTE_TOKEN).
+
+[servidor]
+escucha = "192.168.1.10"   # solo la LAN; nunca 0.0.0.0
+puerto = 8765
+host_publico = "192.168.1.10"   # lo que el ESP32 usa para abrir el WebSocket
+dispositivos_permitidos = ["aa:bb:cc:00:00:01", "02:00:00:00:00:01"]   # la placa y pruebas/cliente_falso.py   # vacío = cualquiera con el token
+log = "INFO"
+
+[stt]
+modelo = "small"   # carpeta en modelos/whisper/<modelo>
+hilos = 8
+# Nombres propios que Whisper debe reconocer (los nombres de los proyectos se añaden solos).
+vocabulario = ["Claude", "YouTube", "Aion 2", "Steam", "Chrome"]
+
+[vad]
+agresividad = 3    # 0 a 3 (3 = el más estricto: el ruido de fondo cuenta menos como voz)
+silencio_fin_ms = 700
+voz_minima_ms = 210   # una frase con menos voz que esto se descarta como ruido
+
+[tts]
+voz = "es_ES-davefx-medium"   # fichero en modelos/piper/
+velocidad = 1.0               # length_scale de Piper (más alto = más lento)
+max_caracteres = 400          # tope de lo que se lee de una respuesta (~25 s); el resto se corta
+
+[claude]
+modelo = "haiku"   # el más barato y rápido; para preguntas difíciles se puede subir a "sonnet"
+conversacion_caduca_min = 30
+proyecto_por_defecto = "minibestia"
+# Se añade al prompt de sistema de Claude Code. Si lo dejas vacío se usa el de por defecto.
+prompt_extra = """Hablas con Juan por un altavoz. Responde en español de España, hablado y muy breve: una o dos frases, como mucho 40 palabras, salvo que pida más detalle. Sin Markdown, sin listas, sin tablas, sin código ni rutas largas leídas en voz alta: resume. Si necesitas leer archivos, hazlo, pero di solo la conclusión. Puedes actuar en los ordenadores de Juan con las herramientas pc: abrir aplicaciones, páginas web y vídeos de YouTube, en el PC grande (Windows, por defecto) o en el mini PC. Úsalas directamente cuando lo pida y confirma en una frase lo que has hecho. Cerrar aplicaciones, apagar o suspender y ejecutar comandos necesitan que Juan confirme: llama a la herramienta y, si te responde que falta la confirmación, pregúntale solo "¿Lo hago? Di sí o no" diciendo qué vas a hacer; no la repitas. No hay herramientas para comprar, pagar, escribir contraseñas ni enviar mensajes, y por voz no se editan archivos: si lo pide, di que por voz no se puede. Antes de un comando, explica en pocas palabras y en español qué hace (campo description). Nunca propongas comandos que borren, sobrescriban, publiquen, hagan push, instalen o apaguen nada."""
+
+[[proyectos]]
+nombre = "minibestia"
+alias = ["mini bestia", "web", "subnicho"]
+carpeta = "/home/usuario/proyecto-a"
+permisos = ["Read", "Grep", "Glob", "WebSearch", "WebFetch",
+            "mcp__pc__estado_equipos", "mcp__pc__encender_equipo", "mcp__pc__listar_apps",
+            "mcp__pc__abrir_app", "mcp__pc__abrir_web", "mcp__pc__youtube"]
+confirmar = ["mcp__pc__cerrar_app", "mcp__pc__apagar_equipo", "Bash"]
+
+[[proyectos]]
+nombre = "movicio"
+alias = ["consolas", "movi"]
+carpeta = "/home/usuario/proyecto-b"
+permisos = ["Read", "Grep", "Glob", "WebSearch", "WebFetch",
+            "mcp__pc__estado_equipos", "mcp__pc__encender_equipo", "mcp__pc__listar_apps",
+            "mcp__pc__abrir_app", "mcp__pc__abrir_web", "mcp__pc__youtube"]
+confirmar = ["mcp__pc__cerrar_app", "mcp__pc__apagar_equipo", "Bash"]
+
+[pc]
+por_defecto = "grande"
+
+[[equipos]]
+nombre = "grande"
+alias = ["pc grande", "ordenador grande", "windows", "torre", "sobremesa"]
+tipo = "windows-ssh"
+usuario = "usuario"
+mac = "aa:bb:cc:00:00:02"
+ip = "192.168.1.20"          # última conocida; se busca por la MAC (el router la cambia)
+red = "192.168.1."
+# La clave es la que ya usa Movicio: se lee de allí, no se copia.
+clave = "/home/usuario/.ssh/pc_grande"
+known_hosts = "/home/usuario/.ssh/known_hosts_pc"
+alias_host = "192.168.1.20"  # nombre con el que la clave del PC está en known_hosts
+
+[[equipos]]
+nombre = "mini"
+alias = ["mini pc", "pc pequeño", "ordenador pequeño", "servidor"]
+tipo = "local"
