@@ -1,0 +1,40 @@
+diff --git a/main/application.cc b/main/application.cc
+index 300a36c..96ae641 100644
+--- a/main/application.cc
++++ b/main/application.cc
+@@ -1086,8 +1086,8 @@ void Application::HandleStateChangedEvent() {
+ 
+             if (listening_mode_ != kListeningModeRealtime) {
+                 audio_service_.EnableVoiceProcessing(false);
+-                // Only AFE wake word can be detected in speaking mode
+-                audio_service_.EnableWakeWordDetection(audio_service_.IsAfeWakeWord());
++                // Minibestia: la palabra de activación también se oye mientras habla, para poder cortarle.
++                audio_service_.EnableWakeWordDetection(true);
+             }
+             audio_service_.ResetDecoder();
+             break;
+diff --git a/main/audio/wake_words/custom_wake_word.cc b/main/audio/wake_words/custom_wake_word.cc
+index 8759ef4..14c68b8 100644
+--- a/main/audio/wake_words/custom_wake_word.cc
++++ b/main/audio/wake_words/custom_wake_word.cc
+@@ -122,7 +122,19 @@ bool CustomWakeWord::Initialize(AudioCodec* codec, srmodel_list_t* models_list)
+     input_buffer_.reserve(multinet_->get_samp_chunksize(multinet_model_data_));
+     esp_mn_commands_clear();
+     for (int i = 0; i < commands_.size(); i++) {
+-        esp_mn_commands_add(i + 1, commands_[i].command.c_str());
++        // Minibestia: una orden puede llevar variantes separadas por «;» («hey claude;hey cloud»), todas con el
++        // mismo identificador, así que cualquiera de ellas dispara la misma acción.
++        const std::string& lista = commands_[i].command;
++        size_t inicio = 0;
++        while (inicio <= lista.size()) {
++            size_t fin = lista.find(';', inicio);
++            if (fin == std::string::npos) fin = lista.size();
++            std::string frase = lista.substr(inicio, fin - inicio);
++            if (!frase.empty()) {
++                esp_mn_commands_add(i + 1, frase.c_str());
++            }
++            inicio = fin + 1;
++        }
+     }
+     esp_mn_commands_update();
+     
