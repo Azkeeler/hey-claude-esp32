@@ -1,0 +1,14 @@
+[Unit]
+Description=Asistente de voz (ESP32 xiaozhi -> Claude Code)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/opt/hey-claude/servidor
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/opt/hey-claude/servidor/.venv/bin/python -m asistente
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
