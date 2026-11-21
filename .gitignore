@@ -1,0 +1,7 @@
+.venv/
+.env
+config.toml
+modelos/
+logs/
+__pycache__/
+firmware/xiaozhi-esp32/
